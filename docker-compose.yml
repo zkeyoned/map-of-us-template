@@ -1,0 +1,22 @@
+services:
+  map-of-us:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: map-of-us
+    restart: unless-stopped
+    ports:
+      - "3002:3000"
+    environment:
+      SITE_PASSWORD: "1234"
+      ADMIN_PASSWORD: "admin1234"
+      AUTH_COOKIE_SECRET: "please-change-this-to-a-long-random-secret"
+
+      MAP_OF_US_STORAGE_MODE: "local"
+      MAP_OF_US_DATA_DIR: "/app/data"
+      MAP_OF_US_BUNDLED_DATA_DIR: "/app/bundled-data"
+
+      MAP_OF_US_DESKTOP: "1"
+
+    volumes:
+      - ./data:/app/data
