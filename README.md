@@ -1,10 +1,112 @@
-![Uploading 8ec0e6225ad10b616db7f0fbd7c51b92.png…]()
-
 # Map of Us
 
 Map of Us 是一个本地优先的个人情侣记忆地图应用。它使用 Next.js 16 App Router、React 19、Tailwind 4 和 Electron，可以在浏览器里开发，也可以打包成桌面应用。
 
 当前版本的目标是：数据全部保存在用户自己的电脑上，不依赖 Supabase，不需要联网认证。
+
+## 本地开发启动
+
+### 运行要求
+
+- Node.js 20 或更新版本。
+- npm。仓库已包含 `package-lock.json`，建议使用 `npm install` 安装依赖。
+
+### 1. 安装依赖
+
+```bash
+npm install
+```
+
+### 2. 配置本地环境变量
+
+浏览器开发模式需要手动配置登录密码和 cookie 签名密钥。在项目根目录创建 `.env.local`：
+
+```bash
+SITE_PASSWORD=1234
+ADMIN_PASSWORD=admin1234
+AUTH_COOKIE_SECRET=replace-with-a-long-random-string
+MAP_OF_US_STORAGE_MODE=local
+```
+
+说明：
+
+- `SITE_PASSWORD`：进入应用的密码。
+- `ADMIN_PASSWORD`：设置页开启管理员模式的密码。
+- `AUTH_COOKIE_SECRET`：用于签名登录 cookie，建议使用足够长的随机字符串。
+- `MAP_OF_US_STORAGE_MODE=local`：强制使用本地文件存储，不连接 Supabase。
+
+如果不配置前三项，登录接口会返回 `Authentication is not configured`。
+
+### 3. 启动浏览器开发服务
+
+```bash
+npm run dev
+```
+
+开发服务会运行在：
+
+```text
+http://localhost:3002
+```
+
+如果 3002 端口被占用，可以临时指定其他端口：
+
+```bash
+npm run dev -- -p 3003
+```
+
+Next.js 16 的 `next dev` 默认使用 Turbopack，开发构建会输出到 `.next/dev`。如需排查兼容问题，可临时改用 Webpack：
+
+```bash
+npm run dev -- --webpack
+```
+
+### 4. 常用验证命令
+
+```bash
+npm run lint
+npm run build
+```
+
+生产预览需要先构建：
+
+```bash
+npm run build
+MAP_OF_US_STORAGE_MODE=local npm run start
+```
+
+`next start` 默认使用 3000 端口；如需沿用 3002：
+
+```bash
+MAP_OF_US_STORAGE_MODE=local npm run start -- -p 3002
+```
+
+注意：项目在 `app/layout.tsx` 使用了 `next/font/google` 的 Geist 字体。首次 `npm run build` 需要能访问 Google Fonts；离线或网络受限时可能报 `Failed to fetch Geist from Google Fonts`。
+
+### Electron 开发启动
+
+如果要以桌面壳方式开发：
+
+```bash
+npm run desktop
+```
+
+Electron 会自动寻找从 3002 开始的可用端口，启动 Next.js 开发服务，并创建本地认证配置：
+
+```text
+macOS: ~/Library/Application Support/Map of Us/auth.local.json
+Windows: %APPDATA%/Map of Us/auth.local.json
+```
+
+Electron 开发/打包模式会自动设置：
+
+```text
+MAP_OF_US_DESKTOP=1
+MAP_OF_US_STORAGE_MODE=local
+MAP_OF_US_DATA_DIR=<Electron userData>/data
+```
+
+所以它不需要 `.env.local` 才能首次登录。默认密码见下方“桌面版密码”。
 
 ## 功能
 
@@ -52,10 +154,6 @@ Map of Us 是一个本地优先的个人情侣记忆地图应用。它使用 Nex
 
 1. 运行 `Map of Us-0.1.0-x64-Setup.exe` 安装。
 2. 若出现蓝色 **SmartScreen** 提示：点 **更多信息 → 仍要运行**。
-
-
-
-
 
 ## 桌面打包
 
@@ -160,8 +258,6 @@ MAP_OF_US_DESKTOP=1
 
 导入会恢复回忆、城市地标、登录照片、纪念日、天气城市、logo，以及地点收藏、纪念日页面、时光宝盒等辅助数据。
 
-```
-
 ## 目录速览
 
 ```text
@@ -176,4 +272,3 @@ public/photos/           默认照片素材
 public/sprites/          城市地标、图标和像素素材
 dist/                    本地打包产物
 ```
-

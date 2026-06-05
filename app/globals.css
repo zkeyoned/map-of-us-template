@@ -85,6 +85,29 @@ button {
     linear-gradient(45deg, transparent 0 38%, #a8c8dc 38% 52%, transparent 52%);
 }
 
+.province-city-list-scroll {
+  scrollbar-color: rgb(168 200 220 / 0.5) transparent;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+.province-city-list-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.province-city-list-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.province-city-list-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgb(168 200 220 / 0.42);
+}
+
+.province-city-list-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgb(168 200 220 / 0.64);
+}
+
 .real-cover-grain {
   background-image:
     linear-gradient(115deg, rgb(255 255 255 / 0.04) 0 1px, transparent 1px 7px),

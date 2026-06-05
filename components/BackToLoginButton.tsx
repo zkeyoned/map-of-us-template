@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock } from "lucide-react";
+import { writeAdminMode } from "@/data/adminMode";
 
 export default function BackToLoginButton() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function BackToLoginButton() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ mode: "all" }),
     }).catch(() => {});
+    writeAdminMode(false);
 
     router.push("/");
     router.refresh();

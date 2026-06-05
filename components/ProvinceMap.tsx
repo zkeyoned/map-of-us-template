@@ -18,7 +18,7 @@ import { chinaFeatures, makePath, makeProjectionForProvince, provinceIdOf } from
 import { cityFallbackSprite, getCitiesByProvince, type City } from "@/data/cities";
 import { getLatestMemory, sortMemoriesByTime, type Memory } from "@/data/memories";
 import { getLitCityIds, memoryStoreUpdatedEvent, type LocalMemoryStore } from "@/data/progress";
-import { adminModeUpdatedEvent, readAdminMode } from "@/data/adminMode";
+import { adminModeUpdatedEvent, readAdminMode, writeAdminMode } from "@/data/adminMode";
 import type { Province } from "@/data/provinces";
 import { LocalPrivacyImage, LocalPrivacyImg } from "@/components/LocalPrivacyImage";
 
@@ -87,6 +87,16 @@ const isDataImageUrl = (url?: string | null): url is string =>
 
 const isBrowserImageUrl = (url?: string | null): url is string =>
   typeof url === "string" && (url.startsWith("data:image/") || url.startsWith("https://"));
+
+const assertAdminResponse = (response: Response, fallbackMessage: string) => {
+  if (response.ok) return;
+  if (response.status === 401 || response.status === 403) {
+    writeAdminMode(false);
+    throw new Error("管理员登录已过期，请到设置页重新开启管理员模式");
+  }
+
+  throw new Error(fallbackMessage);
+};
 
 const useAdminMode = () => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -611,7 +621,7 @@ export default function ProvinceMap({ province, width = 1120, height = 760 }: Pr
       body: JSON.stringify({ cityId, image }),
     });
 
-    if (!response.ok) throw new Error("Failed to save city asset");
+    assertAdminResponse(response, "Failed to save city asset");
 
     const data = (await response.json()) as { assets: CityAssetStore };
     setCityAssets(data.assets);
@@ -626,7 +636,7 @@ export default function ProvinceMap({ province, width = 1120, height = 760 }: Pr
       body: JSON.stringify({ cityId }),
     });
 
-    if (!response.ok) throw new Error("Failed to delete city asset");
+    assertAdminResponse(response, "Failed to delete city asset");
 
     const data = (await response.json()) as { assets: CityAssetStore };
     setCityAssets(data.assets);
@@ -752,7 +762,7 @@ export default function ProvinceMap({ province, width = 1120, height = 760 }: Pr
   return (
     <div
       ref={frameRef}
-      className={`relative mx-auto aspect-[1120/760] w-[min(100%,1120px)] touch-none overflow-visible ${
+      className={`relative mx-auto aspect-[1120/760] w-[min(100%,clamp(560px,calc((100dvh-220px)*1.4737),1120px))] touch-none overflow-visible ${
         dragging ? "cursor-grabbing" : "cursor-grab"
       }`}
       onWheel={handleWheel}
@@ -892,18 +902,18 @@ export default function ProvinceMap({ province, width = 1120, height = 760 }: Pr
       </div>
 
       <aside
-        className="absolute right-0 top-3 z-40 w-[230px] rounded-[8px] border border-[#D8DDD8]/85 bg-[#FAFBF7]/90 p-3 shadow-[0_16px_34px_rgba(90,102,112,0.10)] backdrop-blur"
+        className="absolute right-0 top-3 z-40 flex max-h-[min(520px,calc(100dvh-214px))] w-[238px] flex-col overflow-hidden rounded-[8px] border border-[#D8DDD8]/85 bg-[#FAFBF7]/90 p-3 shadow-[0_16px_34px_rgba(90,102,112,0.10)] backdrop-blur"
         onClick={(event) => event.stopPropagation()}
         onPointerDown={(event) => event.stopPropagation()}
         onPointerMove={(event) => event.stopPropagation()}
         onWheel={(event) => event.stopPropagation()}
         aria-label={`${province.name}城市列表`}
       >
-        <div className="mb-2 flex items-baseline justify-between gap-2">
+        <div className="mb-2 flex shrink-0 items-baseline justify-between gap-2">
           <h2 className="text-sm font-semibold text-[#5A6670]">城市</h2>
           <span className="text-xs font-medium text-[#5A6670]/54">{provinceCities.length}</span>
         </div>
-        <div className="max-h-[430px] space-y-1 overflow-y-auto pr-1">
+        <div className="province-city-list-scroll min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain pr-2">
           {cityList.map((city) => {
             const lit = litCityIds.has(city.id);
             const selected = city.id === selectedCityId;
@@ -1268,8 +1278,8 @@ function MemoryCard({
           quality: landmarkPhotoQuality,
         }),
       );
-    } catch {
-      setLandmarkError("地标图片保存失败，请重新选择");
+    } catch (error) {
+      setLandmarkError(error instanceof Error ? error.message : "地标图片保存失败，请重新选择");
     } finally {
       if (mountedRef.current) setLandmarkSaving(false);
       if (landmarkInputRef.current) landmarkInputRef.current.value = "";
@@ -1291,8 +1301,8 @@ function MemoryCard({
 
     try {
       await onDeleteLandmark(city.id);
-    } catch {
-      setLandmarkError("地标图片删除失败，请稍后再试");
+    } catch (error) {
+      setLandmarkError(error instanceof Error ? error.message : "地标图片删除失败，请稍后再试");
     } finally {
       if (mountedRef.current) setLandmarkSaving(false);
     }
@@ -1367,8 +1377,8 @@ function MemoryCard({
     <motion.article
       className={`absolute z-50 overflow-y-auto rounded-[8px] border border-[#D8DDD8] bg-[#FAFBF7]/94 text-[#5A6670] shadow-[0_18px_42px_rgba(90,102,112,0.18)] backdrop-blur ${
         expanded
-          ? "max-h-[min(720px,calc(100vh-92px))] w-[390px] p-6"
-          : "max-h-[min(620px,calc(100vh-110px))] w-[292px] p-5"
+          ? "max-h-[min(720px,calc(100vh-250px))] w-[390px] p-6"
+          : "max-h-[min(620px,calc(100vh-250px))] w-[292px] p-5"
       }`}
       onClick={(event) => event.stopPropagation()}
       onPointerDown={(event) => event.stopPropagation()}
