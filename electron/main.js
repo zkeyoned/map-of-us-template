@@ -1,5 +1,6 @@
 const { app, BrowserWindow, shell } = require("electron");
 const { spawn } = require("node:child_process");
+const { checkForUpdates } = require("./update-checker");
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const http = require("node:http");
@@ -177,6 +178,10 @@ function createWindow() {
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
+
+  // Check GitHub Releases for a newer version shortly after the window is up,
+  // so the check never delays the app becoming interactive.
+  setTimeout(() => checkForUpdates(mainWindow), 4000);
 }
 
 app.whenReady().then(async () => {

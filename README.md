@@ -172,6 +172,10 @@ MAP_OF_US_DESKTOP=1
 
 导入会恢复回忆、城市地标、登录照片、纪念日、天气城市、logo，以及地点收藏、纪念日页面、时光宝盒等辅助数据。
 
+## 检查更新
+
+桌面版每次打开会自动向 GitHub Releases 查询是否有新版本。发现新版时会弹出提示，点「去下载」即打开最新 release 页面手动下载安装。因为应用未做 Apple 付费签名，macOS 上无法静默自动安装更新，所以采用「检测并提示下载」的方式，Windows 和 macOS 表现一致。检查逻辑在 `electron/update-checker.js`，仓库地址写死在文件顶部，fork 后请自行修改 `repoOwner` / `repoName`。
+
 ## 目录速览
 
 ```text
