@@ -1,6 +1,6 @@
 {
   "name": "map",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Local-first couple memory map desktop app",
   "author": "Map of Us",
   "private": true,
@@ -55,25 +55,25 @@
     }
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.106.0",
+    "@supabase/supabase-js": "^2.110.0",
     "d3-geo": "^3.1.1",
-    "framer-motion": "^12.39.0",
-    "lucide-react": "^1.16.0",
-    "next": "16.2.6",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "framer-motion": "^12.42.2",
+    "lucide-react": "^1.23.0",
+    "next": "^16.2.10",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss": "^4.3.2",
     "@types/d3-geo": "^3.1.0",
     "@types/node": "^20",
-    "@types/react": "^19",
+    "@types/react": "^19.2.17",
     "@types/react-dom": "^19",
-    "electron": "^42.3.0",
-    "electron-builder": "^26.8.1",
+    "electron": "^42.5.2",
+    "electron-builder": "^26.15.3",
     "eslint": "^9",
-    "eslint-config-next": "16.2.6",
-    "tailwindcss": "^4",
+    "eslint-config-next": "^16.2.10",
+    "tailwindcss": "^4.3.2",
     "typescript": "^5"
   }
 }

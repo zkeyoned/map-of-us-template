@@ -1,10 +1,22 @@
-![Uploading 8ec0e6225ad10b616db7f0fbd7c51b92.png…]()
+<p align="center">
+  <img src="marketing/ads/poster-hero.png" alt="Map of Us 海报" width="420" />
+</p>
 
 # Map of Us
 
 Map of Us 是一个本地优先的个人情侣记忆地图应用。它使用 Next.js 16 App Router、React 19、Tailwind 4 和 Electron，可以在浏览器里开发，也可以打包成桌面应用。
 
 当前版本的目标是：数据全部保存在用户自己的电脑上，不依赖 Supabase，不需要联网认证。
+
+## iOS 原生原型
+
+仓库里已经新增一个 SwiftUI iOS 原型工程：
+
+```text
+ios/MapOfUs/MapOfUs.xcodeproj
+```
+
+这个原型不是 WebView 包壳，入口就是“地图记录”：打开后直接进入可拖拽、可缩放的足迹地图，点城市后用底部 sheet 添加回忆，保存后城市被点亮并更新进度。iOS 城市目录由现有 Web 数据生成，目前包含 391 个城市节点。更多说明见 `ios/MapOfUs/README.md`。
 
 ## 功能
 
@@ -39,7 +51,7 @@ Map of Us 是一个本地优先的个人情侣记忆地图应用。它使用 Nex
 
 ### macOS
 
-1. 双击 `Map of Us-0.1.0-arm64.dmg`，把里面的 **Map of Us** 拖进「应用程序」。
+1. 双击 `Map of Us-0.1.2-arm64.dmg`，把里面的 **Map of Us** 拖进「应用程序」。
 2. 在「应用程序」里 **右键点 Map of Us → 打开**，弹窗里再点一次 **打开**。
 3. 若新版 macOS 没有「打开」选项：打开 **系统设置 → 隐私与安全性**，往下找到关于 Map of Us 的提示，点 **仍要打开**。
 4. 若提示 **「已损坏，应移到废纸篓」**：打开「终端」运行下面这句去掉隔离标记，然后再打开：
@@ -50,7 +62,7 @@ Map of Us 是一个本地优先的个人情侣记忆地图应用。它使用 Nex
 
 ### Windows
 
-1. 运行 `Map of Us-0.1.0-x64-Setup.exe` 安装。
+1. 运行 `Map of Us-0.1.2-x64-Setup.exe` 安装。
 2. 若出现蓝色 **SmartScreen** 提示：点 **更多信息 → 仍要运行**。
 
 
@@ -81,7 +93,7 @@ npm run dist:mac
 
 ```text
 dist/mac-arm64/Map of Us.app
-dist/Map of Us-0.1.0-arm64.dmg
+dist/Map of Us-0.1.2-arm64.dmg
 ```
 
 生成 Windows x64 安装包：
@@ -94,7 +106,7 @@ npm run dist:win
 
 ```text
 dist/win-unpacked/Map of Us.exe
-dist/Map of Us-0.1.0-x64-Setup.exe
+dist/Map of Us-0.1.2-x64-Setup.exe
 ```
 
 在 macOS 上可以生成 Windows 安装包，但不能完整验证 Windows 运行效果；最终发布前建议在 Windows 真机或 CI 上再安装运行一次。
@@ -160,8 +172,6 @@ MAP_OF_US_DESKTOP=1
 
 导入会恢复回忆、城市地标、登录照片、纪念日、天气城市、logo，以及地点收藏、纪念日页面、时光宝盒等辅助数据。
 
-```
-
 ## 目录速览
 
 ```text
@@ -176,4 +186,3 @@ public/photos/           默认照片素材
 public/sprites/          城市地标、图标和像素素材
 dist/                    本地打包产物
 ```
-
