@@ -1,6 +1,6 @@
 {
   "name": "map",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Local-first couple memory map desktop app",
   "author": "Map of Us",
   "private": true,

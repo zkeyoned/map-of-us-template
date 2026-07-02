@@ -51,7 +51,7 @@ ios/MapOfUs/MapOfUs.xcodeproj
 
 ### macOS
 
-1. 双击 `Map of Us-0.1.2-arm64.dmg`，把里面的 **Map of Us** 拖进「应用程序」。
+1. 双击 `Map of Us-0.1.3-arm64.dmg`，把里面的 **Map of Us** 拖进「应用程序」。
 2. 在「应用程序」里 **右键点 Map of Us → 打开**，弹窗里再点一次 **打开**。
 3. 若新版 macOS 没有「打开」选项：打开 **系统设置 → 隐私与安全性**，往下找到关于 Map of Us 的提示，点 **仍要打开**。
 4. 若提示 **「已损坏，应移到废纸篓」**：打开「终端」运行下面这句去掉隔离标记，然后再打开：
@@ -62,7 +62,7 @@ ios/MapOfUs/MapOfUs.xcodeproj
 
 ### Windows
 
-1. 运行 `Map of Us-0.1.2-x64-Setup.exe` 安装。
+1. 运行 `Map of Us-0.1.3-x64-Setup.exe` 安装。
 2. 若出现蓝色 **SmartScreen** 提示：点 **更多信息 → 仍要运行**。
 
 
@@ -93,7 +93,7 @@ npm run dist:mac
 
 ```text
 dist/mac-arm64/Map of Us.app
-dist/Map of Us-0.1.2-arm64.dmg
+dist/Map of Us-0.1.3-arm64.dmg
 ```
 
 生成 Windows x64 安装包：
@@ -106,7 +106,7 @@ npm run dist:win
 
 ```text
 dist/win-unpacked/Map of Us.exe
-dist/Map of Us-0.1.2-x64-Setup.exe
+dist/Map of Us-0.1.3-x64-Setup.exe
 ```
 
 在 macOS 上可以生成 Windows 安装包，但不能完整验证 Windows 运行效果；最终发布前建议在 Windows 真机或 CI 上再安装运行一次。
