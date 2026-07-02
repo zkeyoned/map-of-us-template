@@ -1,0 +1,26 @@
+{
+  "exportedAt": "2026-06-11T00:00:00Z",
+  "memories": [
+    {
+      "cityId": "hangzhou",
+      "date": "2025-03-16T00:00:00Z",
+      "id": "00000000-0000-0000-0000-000000000001",
+      "photoName": "sample-photo.jpg",
+      "text": "春天的湖边，风把时间吹慢了一点。"
+    }
+  ],
+  "photos": [
+    {
+      "base64Data": "c2FtcGxl",
+      "filename": "sample-photo.jpg"
+    }
+  ],
+  "version": 2,
+  "wishlist": [
+    {
+      "cityId": "qingdao",
+      "id": "00000000-0000-0000-0000-000000000002",
+      "note": "想一起去海边吹风。"
+    }
+  ]
+}
