@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="bg" x1="1" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#D6E8F0"/>
+      <stop offset="0.48" stop-color="#FAFBF7"/>
+      <stop offset="1" stop-color="#F5DCE0"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="20" stdDeviation="20" flood-color="#5A6670" flood-opacity="0.16"/>
+    </filter>
+    <style>
+      .font { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 74px; font-weight: 900; fill: #3F4C54; letter-spacing: 0; }
+      .sub { font-size: 31px; font-weight: 650; fill: #5A6670; letter-spacing: 0; }
+      .item { font-size: 30px; font-weight: 760; fill: #4B5961; letter-spacing: 0; }
+      .note { font-size: 25px; font-weight: 620; fill: #738087; letter-spacing: 0; }
+    </style>
+  </defs>
+  <rect width="1080" height="1080" fill="url(#bg)"/>
+  <text class="font title" x="84" y="136">把你们的故事</text>
+  <text class="font title" x="84" y="224">放回地图上</text>
+  <text class="font sub" x="88" y="286">Map of Us 开源模板，可自由二次开发</text>
+  <g filter="url(#shadow)" transform="translate(84 372)">
+    <rect width="912" height="438" rx="34" fill="#FAFBF7"/>
+    <g transform="translate(52 58)">
+      <circle cx="28" cy="28" r="28" fill="#F5DCE0"/>
+      <text class="font item" x="76" y="38">城市点亮：按省份和城市记录回忆</text>
+    </g>
+    <g transform="translate(52 146)">
+      <circle cx="28" cy="28" r="28" fill="#D4E8D0"/>
+      <text class="font item" x="76" y="38">照片与文案：登录页、地标、回忆都能换</text>
+    </g>
+    <g transform="translate(52 234)">
+      <circle cx="28" cy="28" r="28" fill="#D6E8F0"/>
+      <text class="font item" x="76" y="38">本地优先：数据存在自己的电脑里</text>
+    </g>
+    <g transform="translate(52 322)">
+      <circle cx="28" cy="28" r="28" fill="#FFE0B8"/>
+      <text class="font item" x="76" y="38">桌面打包：macOS / Windows 安装包</text>
+    </g>
+  </g>
+  <g transform="translate(84 874)">
+    <rect width="350" height="76" rx="38" fill="#3F4C54"/>
+    <text class="font item" x="42" y="49" fill="#FAFBF7">GitHub 已开源</text>
+  </g>
+  <text class="font note" x="84" y="1006">适合做情侣纪念册、旅行足迹、家庭相册、朋友地图。</text>
+</svg>

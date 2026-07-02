@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="628" viewBox="0 0 1200 628">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#FAFBF7"/>
+      <stop offset="0.62" stop-color="#D6E8F0"/>
+      <stop offset="1" stop-color="#D4E8D0"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#5A6670" flood-opacity="0.16"/>
+    </filter>
+    <style>
+      .font { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+      .title { font-size: 62px; font-weight: 880; fill: #3F4C54; letter-spacing: 0; }
+      .sub { font-size: 28px; font-weight: 650; fill: #5A6670; letter-spacing: 0; }
+      .code { font-family: "SFMono-Regular", Consolas, monospace; font-size: 23px; fill: #5A6670; }
+      .chip { font-size: 22px; font-weight: 760; fill: #4B5961; letter-spacing: 0; }
+    </style>
+  </defs>
+  <rect width="1200" height="628" fill="url(#bg)"/>
+  <path d="M50 130 C204 52 350 158 472 96 C600 30 740 84 852 162 C960 238 1052 166 1160 214" fill="none" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round" opacity="0.65"/>
+  <text class="font title" x="70" y="116">Map of Us 开源了</text>
+  <text class="font sub" x="74" y="166">一个本地优先的情侣记忆地图桌面应用模板</text>
+  <g transform="translate(74 226)">
+    <rect width="176" height="52" rx="26" fill="#FFFFFF" opacity="0.86"/>
+    <text class="font chip" x="26" y="34">Next.js 16</text>
+  </g>
+  <g transform="translate(270 226)">
+    <rect width="150" height="52" rx="26" fill="#FFFFFF" opacity="0.7"/>
+    <text class="font chip" x="28" y="34">React 19</text>
+  </g>
+  <g transform="translate(440 226)">
+    <rect width="158" height="52" rx="26" fill="#FFFFFF" opacity="0.7"/>
+    <text class="font chip" x="28" y="34">Electron</text>
+  </g>
+  <g transform="translate(618 226)">
+    <rect width="172" height="52" rx="26" fill="#FFFFFF" opacity="0.7"/>
+    <text class="font chip" x="28" y="34">Local-first</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="70" y="338" width="486" height="194" rx="26" fill="#3F4C54"/>
+    <circle cx="102" cy="374" r="8" fill="#E8B8C2"/>
+    <circle cx="132" cy="374" r="8" fill="#FFE0B8"/>
+    <circle cx="162" cy="374" r="8" fill="#A8C89A"/>
+    <text class="code" x="100" y="424">npm install</text>
+    <text class="code" x="100" y="464">npm run dev</text>
+    <text class="code" x="100" y="504">npm run dist:mac</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="690" y="318" width="406" height="238" rx="28" fill="#FAFBF7"/>
+    <path d="M750 498 C800 442 842 376 914 394 C986 412 980 486 1044 500 C1074 506 1072 532 1038 542 L784 552 C742 550 724 526 750 498 Z" fill="#D6E8F0"/>
+    <path d="M784 486 C840 450 868 424 918 432 C966 440 968 492 1024 504" fill="none" stroke="#E8B8C2" stroke-width="10" stroke-linecap="round" stroke-dasharray="2 22"/>
+    <circle cx="784" cy="486" r="12" fill="#E8B8C2"/>
+    <circle cx="918" cy="432" r="12" fill="#E8B8C2"/>
+    <circle cx="1024" cy="504" r="12" fill="#E8B8C2"/>
+    <rect x="746" y="360" width="136" height="96" rx="16" fill="#F5DCE0"/>
+    <rect x="906" y="360" width="136" height="96" rx="16" fill="#D4E8D0"/>
+  </g>
+  <text class="font sub" x="74" y="584">拿去改成你的旅行、恋爱、家庭、朋友地图。</text>
+</svg>
