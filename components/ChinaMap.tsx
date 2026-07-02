@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Minus, Plus, RotateCcw } from "lucide-react";
@@ -40,6 +40,16 @@ const easyTapProvinceIds = new Set(["hongkong", "macau"]);
 const maxZoom = 1.45;
 const minZoom = 1;
 const stableCoordinate = (value: number) => Number(value.toFixed(3));
+type Pan = {
+  x: number;
+  y: number;
+};
+type DragState = {
+  pointerId: number;
+  startClientX: number;
+  startClientY: number;
+  startPan: Pan;
+};
 
 // The South China Sea ten-dash line, drawn as a small standalone inset box so it
 // is always visible and never overlapped by floating cards on the main map.
@@ -94,6 +104,10 @@ export default function ChinaMap({ width = 1100, height = 860, className }: Chin
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [localMemories, setLocalMemories] = useState<LocalMemoryStore>({});
   const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState<Pan>({ x: 0, y: 0 });
+  const dragStateRef = useRef<DragState | null>(null);
+  const dragMovedRef = useRef(false);
+  const suppressClickRef = useRef(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -150,11 +164,58 @@ export default function ChinaMap({ width = 1100, height = 860, className }: Chin
   const hoveredPath = paths.find((path) => path.id === hoveredId);
   const zoomProgress = ((zoom - minZoom) / (maxZoom - minZoom)) * 100;
   const setClampedZoom = (nextZoom: number) => {
-    setZoom(Math.min(Math.max(nextZoom, minZoom), maxZoom));
+    const clamped = Math.min(Math.max(nextZoom, minZoom), maxZoom);
+    setZoom(clamped);
+    if (clamped === minZoom) setPan({ x: 0, y: 0 });
   };
 
   const goProvince = (id: string) => {
+    if (dragMovedRef.current || suppressClickRef.current) {
+      dragMovedRef.current = false;
+      suppressClickRef.current = false;
+      return;
+    }
     router.push(`/province/${id}`);
+  };
+
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLElement;
+    if (target.closest("button, input")) return;
+
+    dragMovedRef.current = false;
+    suppressClickRef.current = false;
+    dragStateRef.current = {
+      pointerId: event.pointerId,
+      startClientX: event.clientX,
+      startClientY: event.clientY,
+      startPan: pan,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const dragState = dragStateRef.current;
+    if (!dragState || dragState.pointerId !== event.pointerId || zoom <= minZoom) return;
+
+    const dx = event.clientX - dragState.startClientX;
+    const dy = event.clientY - dragState.startClientY;
+    if (Math.abs(dx) + Math.abs(dy) > 6) {
+      dragMovedRef.current = true;
+      suppressClickRef.current = true;
+    }
+
+    const maxPanX = width * (zoom - 1) * 0.24;
+    const maxPanY = height * (zoom - 1) * 0.24;
+    setPan({
+      x: Math.min(Math.max(dragState.startPan.x + dx, -maxPanX), maxPanX),
+      y: Math.min(Math.max(dragState.startPan.y + dy, -maxPanY), maxPanY),
+    });
+  };
+
+  const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (dragStateRef.current?.pointerId === event.pointerId) {
+      dragStateRef.current = null;
+    }
   };
 
   return (
@@ -164,6 +225,10 @@ export default function ChinaMap({ width = 1100, height = 860, className }: Chin
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: "spring", stiffness: 100, damping: 20 }}
       style={{ aspectRatio: `${width} / ${height}` }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
     >
       <div className="absolute left-3 top-1/2 z-20 flex -translate-y-1/2 flex-col items-center gap-2 rounded-full border border-[#D8DDD8]/85 bg-[#FAFBF7]/82 px-2 py-3 shadow-[0_12px_28px_rgba(90,102,112,0.1)] backdrop-blur sm:left-4">
         <button
@@ -203,8 +268,11 @@ export default function ChinaMap({ width = 1100, height = 860, className }: Chin
         <button
           className="grid h-9 w-9 place-items-center rounded-full text-[#5A6670] transition hover:bg-[#D4E8D0]/48 disabled:opacity-35"
           type="button"
-          onClick={() => setZoom(1)}
-          disabled={zoom === 1}
+          onClick={() => {
+            setZoom(1);
+            setPan({ x: 0, y: 0 });
+          }}
+          disabled={zoom === 1 && pan.x === 0 && pan.y === 0}
           aria-label="重置中国地图缩放"
         >
           <RotateCcw className="h-4 w-4" />
@@ -212,8 +280,8 @@ export default function ChinaMap({ width = 1100, height = 860, className }: Chin
       </div>
 
       <motion.div
-        className="map-visual-scale relative h-full w-full overflow-visible"
-        animate={{ scale: zoom }}
+        className="map-visual-scale relative h-full w-full touch-none overflow-visible"
+        animate={{ scale: zoom, x: pan.x, y: pan.y }}
         transition={{ type: "spring", stiffness: 100, damping: 20 }}
         style={{ transformOrigin: "55% 58%" }}
       >

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ImagePlus,
@@ -48,6 +48,15 @@ type DragState = {
   pointerId: number;
   startClientX: number;
   startClientY: number;
+  startCamera: MapCamera;
+};
+type TouchPoint = {
+  clientX: number;
+  clientY: number;
+};
+type PinchState = {
+  startDistance: number;
+  startMidpoint: TouchPoint;
   startCamera: MapCamera;
 };
 type MemoryPanelTab = "memory" | "gallery" | "history";
@@ -264,6 +273,14 @@ const stableCoordinate = (value: number) => Number(value.toFixed(3));
 
 const clampZoom = (value: number) => Math.min(Math.max(value, 1), 2.4);
 
+const getGestureDistance = (first: TouchPoint, second: TouchPoint) =>
+  Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY);
+
+const getGestureMidpoint = (first: TouchPoint, second: TouchPoint): TouchPoint => ({
+  clientX: (first.clientX + second.clientX) / 2,
+  clientY: (first.clientY + second.clientY) / 2,
+});
+
 const readBlobAsDataUrl = (blob: Blob) =>
   new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -355,7 +372,10 @@ export default function ProvinceMap({ province, width = 1120, height = 760 }: Pr
   const localMemoriesRef = useRef<LocalMemoryStore>({});
   const cameraRef = useRef<MapCamera>({ scale: 1, x: 0, y: 0 });
   const dragStateRef = useRef<DragState | null>(null);
+  const activePointersRef = useRef<Map<number, TouchPoint>>(new Map());
+  const pinchStateRef = useRef<PinchState | null>(null);
   const dragMovedRef = useRef(false);
+  const suppressClickRef = useRef(false);
   const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
   const [nudgedCityId, setNudgedCityId] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -713,27 +733,89 @@ export default function ProvinceMap({ province, width = 1120, height = 760 }: Pr
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
-    if (target.closest("button, article, aside")) return;
+    const mapMarker = target.closest("[data-map-marker]");
+    if (target.closest("article, aside") || (target.closest("button, input") && !mapMarker)) return;
 
+    activePointersRef.current.set(event.pointerId, {
+      clientX: event.clientX,
+      clientY: event.clientY,
+    });
     dragMovedRef.current = false;
-    dragStateRef.current = {
-      pointerId: event.pointerId,
-      startClientX: event.clientX,
-      startClientY: event.clientY,
-      startCamera: cameraRef.current,
-    };
+    suppressClickRef.current = false;
+    if (activePointersRef.current.size === 2) {
+      const points = [...activePointersRef.current.values()];
+      const midpoint = getGestureMidpoint(points[0], points[1]);
+      pinchStateRef.current = {
+        startDistance: getGestureDistance(points[0], points[1]),
+        startMidpoint: midpoint,
+        startCamera: cameraRef.current,
+      };
+      dragStateRef.current = null;
+    } else {
+      dragStateRef.current = {
+        pointerId: event.pointerId,
+        startClientX: event.clientX,
+        startClientY: event.clientY,
+        startCamera: cameraRef.current,
+      };
+    }
     event.currentTarget.setPointerCapture(event.pointerId);
     setDragging(true);
   };
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!activePointersRef.current.has(event.pointerId)) return;
+
+    activePointersRef.current.set(event.pointerId, {
+      clientX: event.clientX,
+      clientY: event.clientY,
+    });
+
+    if (pinchStateRef.current && activePointersRef.current.size >= 2) {
+      const points = [...activePointersRef.current.values()];
+      const nextDistance = getGestureDistance(points[0], points[1]);
+      const nextMidpoint = getGestureMidpoint(points[0], points[1]);
+      const startDistance = Math.max(1, pinchStateRef.current.startDistance);
+      const nextScale = clampZoom(
+        pinchStateRef.current.startCamera.scale * (nextDistance / startDistance),
+      );
+      const frame = frameRef.current;
+      const rect = frame?.getBoundingClientRect();
+      const midpointX = rect ? (nextMidpoint.clientX - rect.left) / frameScale : width / 2;
+      const midpointY = rect ? (nextMidpoint.clientY - rect.top) / frameScale : height / 2;
+      const startMidpointX = rect
+        ? (pinchStateRef.current.startMidpoint.clientX - rect.left) / frameScale
+        : midpointX;
+      const startMidpointY = rect
+        ? (pinchStateRef.current.startMidpoint.clientY - rect.top) / frameScale
+        : midpointY;
+      const mapX =
+        (startMidpointX - pinchStateRef.current.startCamera.x) /
+        pinchStateRef.current.startCamera.scale;
+      const mapY =
+        (startMidpointY - pinchStateRef.current.startCamera.y) /
+        pinchStateRef.current.startCamera.scale;
+
+      dragMovedRef.current = true;
+      suppressClickRef.current = true;
+      setCamera({
+        scale: nextScale,
+        x: midpointX - mapX * nextScale,
+        y: midpointY - mapY * nextScale,
+      });
+      return;
+    }
+
     const dragState = dragStateRef.current;
     if (!dragState || dragState.pointerId !== event.pointerId) return;
 
     const dx = (event.clientX - dragState.startClientX) / frameScale;
     const dy = (event.clientY - dragState.startClientY) / frameScale;
 
-    if (Math.abs(dx) + Math.abs(dy) > 3) dragMovedRef.current = true;
+    if (Math.abs(dx) + Math.abs(dy) > 6) {
+      dragMovedRef.current = true;
+      suppressClickRef.current = true;
+    }
 
     setCamera({
       ...dragState.startCamera,
@@ -743,8 +825,22 @@ export default function ProvinceMap({ province, width = 1120, height = 760 }: Pr
   };
 
   const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    activePointersRef.current.delete(event.pointerId);
     if (dragStateRef.current?.pointerId === event.pointerId) {
       dragStateRef.current = null;
+    }
+    if (activePointersRef.current.size < 2) {
+      pinchStateRef.current = null;
+    }
+    if (activePointersRef.current.size === 1) {
+      const [remainingPointerId, point] = [...activePointersRef.current.entries()][0];
+      dragStateRef.current = {
+        pointerId: remainingPointerId,
+        startClientX: point.clientX,
+        startClientY: point.clientY,
+        startCamera: cameraRef.current,
+      };
+    } else if (activePointersRef.current.size === 0) {
       setDragging(false);
     }
   };
@@ -761,8 +857,9 @@ export default function ProvinceMap({ province, width = 1120, height = 760 }: Pr
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
       onClick={(event) => {
-        if (dragMovedRef.current) {
+        if (dragMovedRef.current || suppressClickRef.current) {
           dragMovedRef.current = false;
+          suppressClickRef.current = false;
           return;
         }
         const target = event.target as HTMLElement;
@@ -844,9 +941,15 @@ export default function ProvinceMap({ province, width = 1120, height = 760 }: Pr
                   height: layout.height,
                   opacity: faded ? 0.28 : 1,
                 }}
+                data-map-marker
                 type="button"
                 onClick={(event) => {
                   event.stopPropagation();
+                  if (dragMovedRef.current || suppressClickRef.current) {
+                    dragMovedRef.current = false;
+                    suppressClickRef.current = false;
+                    return;
+                  }
                   handleSelectCity(city.id, city.lit);
                 }}
                 aria-label={`${city.lit ? "查看" : "添加"}${city.name}回忆`}
@@ -892,7 +995,7 @@ export default function ProvinceMap({ province, width = 1120, height = 760 }: Pr
       </div>
 
       <aside
-        className="absolute right-0 top-3 z-40 w-[230px] rounded-[8px] border border-[#D8DDD8]/85 bg-[#FAFBF7]/90 p-3 shadow-[0_16px_34px_rgba(90,102,112,0.10)] backdrop-blur"
+        className="absolute right-0 top-3 z-40 hidden w-[230px] rounded-[8px] border border-[#D8DDD8]/85 bg-[#FAFBF7]/90 p-3 shadow-[0_16px_34px_rgba(90,102,112,0.10)] backdrop-blur sm:block"
         onClick={(event) => event.stopPropagation()}
         onPointerDown={(event) => event.stopPropagation()}
         onPointerMove={(event) => event.stopPropagation()}
@@ -1365,9 +1468,9 @@ function MemoryCard({
 
   return (
     <motion.article
-      className={`absolute z-50 overflow-y-auto rounded-[8px] border border-[#D8DDD8] bg-[#FAFBF7]/94 text-[#5A6670] shadow-[0_18px_42px_rgba(90,102,112,0.18)] backdrop-blur ${
+      className={`province-memory-card z-50 overflow-y-auto rounded-[8px] border border-[#D8DDD8] bg-[#FAFBF7]/94 text-[#5A6670] shadow-[0_18px_42px_rgba(90,102,112,0.18)] backdrop-blur ${
         expanded
-          ? "max-h-[min(720px,calc(100vh-92px))] w-[390px] p-6"
+          ? "is-expanded max-h-[min(720px,calc(100vh-92px))] w-[390px] p-6"
           : "max-h-[min(620px,calc(100vh-110px))] w-[292px] p-5"
       }`}
       onClick={(event) => event.stopPropagation()}
@@ -1379,11 +1482,14 @@ function MemoryCard({
       transition={spring}
       style={
         expanded
-          ? { right: 0, top: 12 }
+          ? {
+              "--memory-card-right": "0px",
+              "--memory-card-top": "12px",
+            } as CSSProperties
           : {
-              left: anchor ? anchor.x : 24,
-              top: anchor ? anchor.y : "50%",
-            }
+              "--memory-card-left": `${anchor ? anchor.x : 24}px`,
+              "--memory-card-top": anchor ? `${anchor.y}px` : "50%",
+            } as CSSProperties
       }
     >
       <div className="flex items-start justify-between gap-4">

@@ -42,6 +42,36 @@ button {
   transform-origin: center center;
 }
 
+.province-memory-card {
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  left: 0.75rem;
+  position: fixed;
+  right: 0.75rem;
+  width: auto;
+  max-height: min(72dvh, 620px);
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 640px) {
+  .province-memory-card {
+    bottom: auto;
+    left: var(--memory-card-left, 24px);
+    position: absolute;
+    right: auto;
+    top: var(--memory-card-top, 50%);
+    width: 292px;
+    max-height: min(620px, calc(100vh - 110px));
+  }
+
+  .province-memory-card.is-expanded {
+    left: auto;
+    right: var(--memory-card-right, 0);
+    top: var(--memory-card-top, 12px);
+    width: 390px;
+    max-height: min(720px, calc(100vh - 92px));
+  }
+}
+
 .map-mist-band {
   position: absolute;
   inset: auto 0 0;
