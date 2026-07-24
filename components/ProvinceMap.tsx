@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -759,7 +760,9 @@ export default function ProvinceMap({ province, width = 1120, height = 760 }: Pr
         startCamera: cameraRef.current,
       };
     }
-    event.currentTarget.setPointerCapture(event.pointerId);
+    // Capture is deferred to handlePointerMove: capturing on pointerdown makes
+    // some Chromium builds (notably the packaged Electron app) retarget the
+    // subsequent click to this container, swallowing city/province clicks.
     setDragging(true);
   };
 
@@ -798,6 +801,9 @@ export default function ProvinceMap({ province, width = 1120, height = 760 }: Pr
 
       dragMovedRef.current = true;
       suppressClickRef.current = true;
+      if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }
       setCamera({
         scale: nextScale,
         x: midpointX - mapX * nextScale,
@@ -815,6 +821,9 @@ export default function ProvinceMap({ province, width = 1120, height = 760 }: Pr
     if (Math.abs(dx) + Math.abs(dy) > 6) {
       dragMovedRef.current = true;
       suppressClickRef.current = true;
+      if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }
     }
 
     setCamera({
@@ -1767,16 +1776,25 @@ function MemoryCard({
         </div>
       )}
 
-      {showMemory && !formOpen && (
+      {showMemory && !formOpen && isAdmin && (
         <button
           className="mt-4 flex w-full items-center gap-2 border-t border-dashed border-[#D8DDD8] pt-4 text-sm font-medium text-[#5A6670]/78 transition hover:text-[#A8C8DC]"
           type="button"
           onClick={() => setFormOpen(true)}
-          disabled={!isAdmin}
         >
           <Plus className="h-4 w-4" />
           {isLit ? "Add memory" : "Add memory to light"}
         </button>
+      )}
+
+      {showMemory && !formOpen && !isAdmin && (
+        <Link
+          className="mt-4 flex w-full items-center gap-2 border-t border-dashed border-[#D8DDD8] pt-4 text-sm font-medium text-[#5A6670]/58 transition hover:text-[#A8C8DC]"
+          href="/settings"
+        >
+          <Plus className="h-4 w-4" />
+          想添加回忆？先去设置页开启管理员模式 →
+        </Link>
       )}
 
       <AnimatePresence initial={false}>

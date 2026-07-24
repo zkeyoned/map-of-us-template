@@ -190,7 +190,9 @@ export default function ChinaMap({ width = 1100, height = 860, className }: Chin
       startClientY: event.clientY,
       startPan: pan,
     };
-    event.currentTarget.setPointerCapture(event.pointerId);
+    // Capture is deferred to handlePointerMove: capturing on pointerdown makes
+    // some Chromium builds (notably the packaged Electron app) retarget the
+    // subsequent click to this container, so province <path> onClick never fires.
   };
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -202,6 +204,9 @@ export default function ChinaMap({ width = 1100, height = 860, className }: Chin
     if (Math.abs(dx) + Math.abs(dy) > 6) {
       dragMovedRef.current = true;
       suppressClickRef.current = true;
+      if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }
     }
 
     const maxPanX = width * (zoom - 1) * 0.24;

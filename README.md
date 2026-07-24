@@ -43,6 +43,15 @@ ios/MapOfUs/MapOfUs.xcodeproj
 - **管理员密码**自己设置。
 - 修改后立即生效，关机重开也用新密码。
 
+> **注意：初始密码只在这台电脑第一次启动时生效。** 改过密码后，以后一直用你自己改的那个；**卸载重装不会重置密码**（密码存在系统的用户数据目录里，不跟 app 一起删除）。
+
+**忘记密码怎么办？** 删除本地认证配置文件，重启 app 即恢复初始密码（数据和照片不受影响）：
+
+```text
+macOS:   ~/Library/Application Support/Map of Us/auth.local.json
+Windows: %APPDATA%\Map of Us\auth.local.json
+```
+
 技术说明：桌面版不依赖 `.env.local`。首次启动时 Electron 会在用户数据目录创建本地认证配置 `auth.local.json`，保存这两个密码；`AUTH_COOKIE_SECRET` 会随机生成并存在同一文件里。在设置页改密码会直接写回这个文件。若启动环境显式设置了 `SITE_PASSWORD`、`ADMIN_PASSWORD` 或 `AUTH_COOKIE_SECRET`，则优先使用环境变量。
 
 ## 安装与首次打开（给使用者）
